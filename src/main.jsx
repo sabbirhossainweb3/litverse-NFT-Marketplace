@@ -1,13 +1,14 @@
 import React,{useEffect,useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {ethers} from 'ethers';
-import {Home,ImagePlus,Store,GalleryVerticalEnd,Activity,Wallet,Plus,ArrowUpRight,RefreshCw,Compass,Flame,Menu,X,ExternalLink,ShieldCheck,Sparkles} from 'lucide-react';
+import {Home,ImagePlus,Store,GalleryVerticalEnd,Activity,MessageCircle,Wallet,Plus,ArrowUpRight,RefreshCw,Compass,Flame,Menu,X,ExternalLink,ShieldCheck,Sparkles} from 'lucide-react';
 import './style.css';
+import Community from './Community.jsx';
 
 const CHAIN={chainId:'0x1159',chainName:'LitVM LiteForge',nativeCurrency:{name:'zkLTC',symbol:'zkLTC',decimals:18},rpcUrls:['https://liteforge.rpc.caldera.xyz/http'],blockExplorerUrls:['https://liteforge.explorer.caldera.xyz']};
 const CONTRACT_ADDRESS=import.meta.env.VITE_LITVERSE_NFT_CONTRACT_ADDRESS||'';
 const short=a=>a?`${a.slice(0,6)}...${a.slice(-4)}`:'';
-const tabs=[['Home',Home],['NFT Studio',ImagePlus],['Marketplace',Store],['My NFTs',GalleryVerticalEnd],['Collection',Compass],['Activity',Activity]];
+const tabs=[['Home',Home],['NFT Studio',ImagePlus],['Marketplace',Store],['My NFTs',GalleryVerticalEnd],['Collection',Compass],['Activity',Activity],['Community',MessageCircle]];
 function App(){
  const [account,setAccount]=useState(''),[provider,setProvider]=useState(null),[contract,setContract]=useState(null);
  const [tab,setTab]=useState('Home'),[mobileMenu,setMobileMenu]=useState(false);
@@ -51,7 +52,8 @@ function App(){
    <div className="lv-stats"><div><b>{nfts.length||'12.5K+'}</b><span>Total NFTs</span></div><div><b>{'3.2K+'}</b><span>Collectors</span></div><div><b>{'85.7K'}</b><span>Volume (zkLTC)</span></div><div><b>{listings.length||'2.5K+'}</b><span>Total sales</span></div></div>
   </section>}
   <div className="lv-notice">{notice}</div>
-  <main className="lv-main">
+  {tab==='Community'&&<Community/>}
+  <main className="lv-main" style={tab==='Community'?{display:'none'}:undefined}>
    <div className="lv-section-heading"><div><span className="lv-overline">{tab==='Home'?'DISCOVER THE UNIVERSE':'LITVERSE ECOSYSTEM'}</span><h2>{tab==='Home'?'Trending NFTs':tab}</h2><p>{tab==='Home'?'Explore hand-picked digital collectibles from creators.':'Discover, create and collect on LitVerse.'}</p></div><button className="lv-refresh" onClick={load}><RefreshCw size={15}/> Refresh</button></div>
    {tab==='NFT Studio'&&<section className="mint-layout"><div className="mint-form"><div className="form-heading"><span className="form-icon"><ImagePlus/></span><div><b>Create your collectible</b><small>Bring your imagination on-chain</small></div><span className="test-badge">TESTNET</span></div>
     <label>NFT Name</label><input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. LitVerse Genesis #001"/>
