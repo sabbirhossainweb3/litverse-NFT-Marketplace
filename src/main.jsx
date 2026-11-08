@@ -4,11 +4,13 @@ import {ethers} from 'ethers';
 import {Home,ImagePlus,Store,GalleryVerticalEnd,Activity,MessageCircle,Wallet,Plus,ArrowUpRight,RefreshCw,Compass,Flame,Menu,X,ExternalLink,ShieldCheck,Sparkles} from 'lucide-react';
 import './style.css';
 import Community from './Community.jsx';
+import EarlyMint from './EarlyMint.jsx';
+import {litVerseAbi} from './lib/litverseAbi.js';
 
 const CHAIN={chainId:'0x1159',chainName:'LitVM LiteForge',nativeCurrency:{name:'zkLTC',symbol:'zkLTC',decimals:18},rpcUrls:['https://liteforge.rpc.caldera.xyz/http'],blockExplorerUrls:['https://liteforge.explorer.caldera.xyz']};
-const CONTRACT_ADDRESS=import.meta.env.VITE_LITVERSE_NFT_CONTRACT_ADDRESS||'';
+const CONTRACT_ADDRESS=import.meta.env.VITE_LITVERSE_NFT_CONTRACT_ADDRESS||'0xA924e2373F9f738ed9B8cf2FCd4ddfDcAd83C0e1';
 const short=a=>a?`${a.slice(0,6)}...${a.slice(-4)}`:'';
-const tabs=[['Home',Home],['NFT Studio',ImagePlus],['Marketplace',Store],['My NFTs',GalleryVerticalEnd],['Collection',Compass],['Activity',Activity],['Community',MessageCircle]];
+const tabs=[['Home',Home],['NFT Studio',ImagePlus],['Marketplace',Store],['My NFTs',GalleryVerticalEnd],['Collection',Compass],['Activity',Activity],['Community',MessageCircle],['Early Mint',Sparkles]];
 function App(){
  const [account,setAccount]=useState(''),[provider,setProvider]=useState(null),[contract,setContract]=useState(null);
  const [tab,setTab]=useState('Home'),[mobileMenu,setMobileMenu]=useState(false);
@@ -25,8 +27,8 @@ function App(){
    try{await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:CHAIN.chainId}]})}
    catch(e){if(e.code===4902)await window.ethereum.request({method:'wallet_addEthereumChain',params:[CHAIN]});else throw e;}
    const signer=await p.getSigner(),a=await signer.getAddress();setProvider(p);setAccount(a);
-   if(CONTRACT_ADDRESS) setNotice('Wallet connected. Contract integration will activate after the new LitVerse contract is deployed and configured.');
-   else setNotice('Wallet connected to LitVM Testnet. Contract address will be added after deployment.');
+   const c=new ethers.Contract(CONTRACT_ADDRESS,litVerseAbi,signer);setContract(c);
+   setNotice('Wallet connected to LitVM LiteForge. LitVerse contract connected: '+short(CONTRACT_ADDRESS));
   }catch(e){setNotice(e.shortMessage||e.message||'Wallet connection failed');}
  }
  function chooseImage(e){
@@ -53,7 +55,8 @@ function App(){
   </section>}
   <div className="lv-notice">{notice}</div>
   {tab==='Community'&&<Community/>}
-  <main className="lv-main" style={tab==='Community'?{display:'none'}:undefined}>
+  {tab==='Early Mint'&&<EarlyMint contract={contract} account={account}/ >}
+  <main className="lv-main" style={tab==='Community'||tab==='Early Mint'?{display:'none'}:undefined}>
    <div className="lv-section-heading"><div><span className="lv-overline">{tab==='Home'?'DISCOVER THE UNIVERSE':'LITVERSE ECOSYSTEM'}</span><h2>{tab==='Home'?'Trending NFTs':tab}</h2><p>{tab==='Home'?'Explore hand-picked digital collectibles from creators.':'Discover, create and collect on LitVerse.'}</p></div><button className="lv-refresh" onClick={load}><RefreshCw size={15}/> Refresh</button></div>
    {tab==='NFT Studio'&&<section className="mint-layout"><div className="mint-form"><div className="form-heading"><span className="form-icon"><ImagePlus/></span><div><b>Create your collectible</b><small>Bring your imagination on-chain</small></div><span className="test-badge">TESTNET</span></div>
     <label>NFT Name</label><input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. LitVerse Genesis #001"/>
