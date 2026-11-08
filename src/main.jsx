@@ -8,7 +8,7 @@ import EarlyMint from './EarlyMint.jsx';
 import {litVerseAbi} from './lib/litverseAbi.js';
 
 const CHAIN={chainId:'0x1159',chainName:'LitVM LiteForge',nativeCurrency:{name:'zkLTC',symbol:'zkLTC',decimals:18},rpcUrls:['https://liteforge.rpc.caldera.xyz/http'],blockExplorerUrls:['https://liteforge.explorer.caldera.xyz']};
-const CONTRACT_ADDRESS=import.meta.env.VITE_LITVERSE_NFT_CONTRACT_ADDRESS||'0xA924e2373F9f738ed9B8cf2FCd4ddfDcAd83C0e1';
+const CONTRACT_ADDRESS='0xA924e2373F9f738ed9B8cf2FCd4ddfDcAd83C0e1';
 const short=a=>a?`${a.slice(0,6)}...${a.slice(-4)}`:'';
 const tabs=[['Home',Home],['NFT Studio',ImagePlus],['Marketplace',Store],['My NFTs',GalleryVerticalEnd],['Collection',Compass],['Activity',Activity],['Community',MessageCircle],['Early Mint',Sparkles]];
 function App(){
