@@ -1,5 +1,6 @@
 import React,{useCallback,useEffect,useState} from "react";
 import {ethers} from "ethers";
+import "./early-mint.css";
 
 const EXPLORER = "https://liteforge.explorer.caldera.xyz/address/";
 
