@@ -87,11 +87,11 @@ contract LitVerseNFT is
         uint256 initialMintPrice,
         uint256 initialWalletLimit
     ) external initializer {
-        require(initialOwner != address(0), "Invalid owner");
-        require(initialFeeRecipient != address(0), "Invalid fee recipient");
-        require(initialRoyaltyReceiver != address(0), "Invalid royalty receiver");
-        require(initialMaxSupply >= GENESIS_LIMIT, "Supply below genesis limit");
-        require(initialWalletLimit > 0, "Invalid wallet limit");
+        require(initialOwner != address(0));
+        require(initialFeeRecipient != address(0));
+        require(initialRoyaltyReceiver != address(0));
+        require(initialMaxSupply >= GENESIS_LIMIT);
+        require(initialWalletLimit > 0);
 
         __ERC721_init("LitVerse", "LTV");
         __ERC721URIStorage_init();
@@ -113,9 +113,9 @@ contract LitVerseNFT is
     }
 
     modifier onlyWhilePublicSale() {
-        require(publicSaleActive, "Public sale inactive");
-        require(block.timestamp >= saleStartTime, "Sale not started");
-        require(saleEndTime == 0 || block.timestamp <= saleEndTime, "Sale ended");
+        require(publicSaleActive);
+        require(block.timestamp >= saleStartTime);
+        require(saleEndTime == 0 || block.timestamp <= saleEndTime);
         _;
     }
 
@@ -126,8 +126,8 @@ contract LitVerseNFT is
         uint256 endTime,
         uint256 newWalletLimit
     ) external onlyOwner {
-        require(endTime == 0 || endTime >= startTime, "Invalid sale window");
-        require(newWalletLimit > 0, "Invalid wallet limit");
+        require(endTime == 0 || endTime >= startTime);
+        require(newWalletLimit > 0);
         publicSaleActive = active;
         mintPrice = price;
         saleStartTime = startTime;
@@ -144,9 +144,9 @@ contract LitVerseNFT is
         onlyWhilePublicSale
         returns (uint256 tokenId)
     {
-        require(msg.value == mintPrice, "Incorrect payment");
-        require(totalMinted < maxSupply, "Max supply reached");
-        require(walletMinted[msg.sender] < walletLimit, "Wallet limit reached");
+        require(msg.value == mintPrice);
+        require(totalMinted < maxSupply);
+        require(walletMinted[msg.sender] < walletLimit);
 
         tokenId = ++totalMinted;
         walletMinted[msg.sender] += 1;
@@ -162,8 +162,8 @@ contract LitVerseNFT is
         whenNotPaused
         returns (uint256 tokenId)
     {
-        require(recipient != address(0), "Invalid recipient");
-        require(totalMinted < maxSupply, "Max supply reached");
+        require(recipient != address(0));
+        require(totalMinted < maxSupply);
 
         tokenId = ++totalMinted;
         walletMinted[recipient] += 1;
@@ -180,7 +180,7 @@ contract LitVerseNFT is
     }
 
     function setGenesisEligibility(address wallet, bool eligible) external onlyOwner {
-        require(wallet != address(0), "Invalid wallet");
+        require(wallet != address(0));
         genesisEligible[wallet] = eligible;
         emit GenesisEligibilityUpdated(wallet, eligible);
     }
@@ -189,9 +189,9 @@ contract LitVerseNFT is
         external
         onlyOwner
     {
-        require(wallets.length <= GENESIS_LIMIT, "Batch too large");
+        require(wallets.length <= GENESIS_LIMIT);
         for (uint256 i = 0; i < wallets.length; i++) {
-            require(wallets[i] != address(0), "Invalid wallet");
+            require(wallets[i] != address(0));
             genesisEligible[wallets[i]] = eligible;
             emit GenesisEligibilityUpdated(wallets[i], eligible);
         }
@@ -203,11 +203,11 @@ contract LitVerseNFT is
         nonReentrant
         returns (uint256 tokenId)
     {
-        require(genesisSaleActive, "Genesis mint inactive");
-        require(genesisEligible[msg.sender], "Wallet not eligible");
-        require(!hasMintedGenesis[msg.sender], "Genesis already claimed");
-        require(genesisMinted < GENESIS_LIMIT, "Genesis supply reached");
-        require(totalMinted < maxSupply, "Max supply reached");
+        require(genesisSaleActive);
+        require(genesisEligible[msg.sender]);
+        require(!hasMintedGenesis[msg.sender]);
+        require(genesisMinted < GENESIS_LIMIT);
+        require(totalMinted < maxSupply);
 
         hasMintedGenesis[msg.sender] = true;
         genesisMinted += 1;
@@ -220,12 +220,9 @@ contract LitVerseNFT is
     }
 
     function listNFT(uint256 tokenId, uint256 price) external whenNotPaused {
-        require(ownerOf(tokenId) == msg.sender, "Not token owner");
-        require(price > 0, "Price must be positive");
-        require(
-            getApproved(tokenId) == address(this) || isApprovedForAll(msg.sender, address(this)),
-            "Marketplace not approved"
-        );
+        require(ownerOf(tokenId) == msg.sender);
+        require(price > 0);
+        require(getApproved(tokenId) == address(this) || isApprovedForAll(msg.sender, address(this)));
 
         listings[tokenId] = Listing({seller: msg.sender, price: price});
         emit Listed(tokenId, msg.sender, price);
@@ -233,16 +230,16 @@ contract LitVerseNFT is
 
     function cancelListing(uint256 tokenId) external {
         Listing memory listing = listings[tokenId];
-        require(listing.seller == msg.sender, "Not listing seller");
+        require(listing.seller == msg.sender);
         delete listings[tokenId];
         emit ListingCancelled(tokenId);
     }
 
     function buyNFT(uint256 tokenId) external payable whenNotPaused nonReentrant {
         Listing memory listing = listings[tokenId];
-        require(listing.seller != address(0), "Not listed");
-        require(msg.value == listing.price, "Incorrect payment");
-        require(ownerOf(tokenId) == listing.seller, "Seller no longer owns NFT");
+        require(listing.seller != address(0));
+        require(msg.value == listing.price);
+        require(ownerOf(tokenId) == listing.seller);
 
         delete listings[tokenId];
 
@@ -250,7 +247,7 @@ contract LitVerseNFT is
         (address royaltyReceiverForToken, uint256 royaltyAmount) =
             royaltyInfo(tokenId, listing.price);
         uint256 totalDeductions = platformFee + royaltyAmount;
-        require(totalDeductions <= listing.price, "Fees exceed sale price");
+        require(totalDeductions <= listing.price);
 
         uint256 sellerProceeds = listing.price - totalDeductions;
 
@@ -268,16 +265,16 @@ contract LitVerseNFT is
         external
         onlyOwner
     {
-        require(newFeeBps <= 500, "Fee above 5 percent");
-        require(newFeeRecipient != address(0), "Invalid fee recipient");
+        require(newFeeBps <= 500);
+        require(newFeeRecipient != address(0));
         platformFeeBps = newFeeBps;
         feeRecipient = newFeeRecipient;
         emit PlatformFeeUpdated(newFeeBps, newFeeRecipient);
     }
 
     function setRoyalty(address newReceiver, uint96 newRoyaltyBps) external onlyOwner {
-        require(newReceiver != address(0), "Invalid royalty receiver");
-        require(newRoyaltyBps <= 1000, "Royalty above 10 percent");
+        require(newReceiver != address(0));
+        require(newRoyaltyBps <= 1000);
         royaltyReceiver = newReceiver;
         _setDefaultRoyalty(newReceiver, newRoyaltyBps);
         emit RoyaltyUpdated(newReceiver, newRoyaltyBps);
@@ -292,9 +289,9 @@ contract LitVerseNFT is
     }
 
     function withdraw(address payable recipient) external onlyOwner nonReentrant {
-        require(recipient != address(0), "Invalid recipient");
+        require(recipient != address(0));
         uint256 amount = address(this).balance;
-        require(amount > 0, "No balance");
+        require(amount > 0);
         _sendValue(recipient, amount);
         emit Withdrawn(recipient, amount);
     }
@@ -302,7 +299,7 @@ contract LitVerseNFT is
     function _sendValue(address payable recipient, uint256 amount) private {
         if (amount == 0) return;
         (bool success,) = recipient.call{value: amount}("");
-        require(success, "Payment transfer failed");
+        require(success);
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
@@ -312,7 +309,7 @@ contract LitVerseNFT is
         override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
         returns (address)
     {
-        require(!paused(), "Token transfers paused");
+        require(!paused());
         return super._update(to, tokenId, auth);
     }
 
